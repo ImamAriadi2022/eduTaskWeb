@@ -20,14 +20,17 @@ const TugasIndividu = () => {
     fetch(`http://localhost:5000/api/tugas?user_id=${user.id}&type=Individu`)
       .then((res) => res.json())
       .then((data) => {
-        setTasks(data);
+        const filtered = Array.isArray(data)
+          ? data.filter((t) => t.type === "Individu")
+          : [];
+        setTasks(filtered);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, [user]);
 
   const handleEdit = (task) => {
-    setEditTask({ ...task });
+    setEditTask({ ...task }); // pastikan semua field ikut, termasuk type
     setShowModal(true);
   };
 
@@ -35,20 +38,34 @@ const TugasIndividu = () => {
     setEditTask({ ...editTask, [e.target.name]: e.target.value });
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    try {
-      await fetch(`http://localhost:5000/api/tugas/${editTask.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editTask),
-      });
-      setTasks(tasks.map((t) => (t.id === editTask.id ? editTask : t)));
+const handleSave = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch(`http://localhost:5000/api/tugas/${editTask.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: editTask.title,
+        course: editTask.course,
+        type: "Individu",
+        jenis: editTask.jenis,
+        deadline: editTask.deadline.slice(0, 10), // Format YYYY-MM-DD
+        status: editTask.status,
+        note: editTask.note,
+        anggota: null,
+      }),
+    });
+    const result = await response.json();
+    if (result.success) {
+      setTasks(tasks.map((t) => (t.id === editTask.id ? result.updated : t)));
       setShowModal(false);
-    } catch {
+    } else {
       alert("Gagal menyimpan perubahan.");
     }
-  };
+  } catch {
+    alert("Gagal menyimpan perubahan.");
+  }
+};
 
   return (
     <div
@@ -69,6 +86,8 @@ const TugasIndividu = () => {
               <div className="text-center my-4">
                 <Spinner animation="border" variant="warning" />
               </div>
+            ) : tasks.length === 0 ? (
+              <div className="text-center text-muted my-4">Tidak ada tugas.</div>
             ) : (
               <Table striped bordered hover responsive>
                 <thead>
@@ -170,6 +189,7 @@ const TugasIndividu = () => {
                       onChange={handleChange}
                     >
                       <option value="Selesai">Selesai</option>
+                      <option value="Progres">Sedang Dikerjakan</option>
                       <option value="Belum Selesai">Belum Selesai</option>
                     </Form.Select>
                   </Form.Group>

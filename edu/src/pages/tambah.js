@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import Sidebar from "../components/sidebar";
 import BrandNavbar from "../components/navbar";
 import Footer from "../components/footer";
-import { Card, Form, Button, Row, Col, InputGroup } from "react-bootstrap";
-import { FaBook, FaUsers, FaUser, FaFileAlt, FaStickyNote, FaPlus, FaTrash } from "react-icons/fa";
+import { Card, Form, Button, Row, Col, InputGroup, Alert } from "react-bootstrap";
+import { FaBook, FaUsers, FaFileAlt, FaStickyNote, FaPlus, FaTrash } from "react-icons/fa";
 
 const jenisTugasOptions = [
   { value: "Makalah", label: "Makalah" },
@@ -29,7 +29,13 @@ const TambahTugas = () => {
     status: "Belum Dikerjakan",
     note: "",
     anggota: [""],
+    deadline: "",
   });
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  // Ambil user dari localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -50,19 +56,54 @@ const TambahTugas = () => {
     setForm({ ...form, anggota: newAnggota });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simpan tugas (dummy)
-    alert("Tugas berhasil ditambahkan!\n\n" + JSON.stringify(form, null, 2));
-    setForm({
-      matakuliah: "",
-      jenisKelompok: "Individu",
-      jenisTugas: "Makalah",
-      jenisTugasLain: "",
-      status: "Belum Dikerjakan",
-      note: "",
-      anggota: [""],
-    });
+    setSuccess("");
+    setError("");
+    if (!user) {
+      setError("Anda harus login terlebih dahulu.");
+      return;
+    }
+    // Validasi anggota kelompok jika kelompok
+    if (form.jenisKelompok === "Kelompok" && form.anggota.some((a) => !a.trim())) {
+      setError("Nama anggota kelompok tidak boleh kosong.");
+      return;
+    }
+    try {
+      const res = await fetch("http://localhost:5000/api/tugas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: form.jenisTugas === "Lainnya" ? form.jenisTugasLain : form.jenisTugas,
+          course: form.matakuliah,
+          type: form.jenisKelompok,
+          jenis: form.jenisTugas,
+          deadline: form.deadline,
+          status: form.status,
+          note: form.note,
+          anggota: form.jenisKelompok === "Kelompok" ? form.anggota.join(", ") : null,
+          user_id: user.id,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSuccess("Tugas berhasil ditambahkan!");
+        setForm({
+          matakuliah: "",
+          jenisKelompok: "Individu",
+          jenisTugas: "Makalah",
+          jenisTugasLain: "",
+          status: "Belum Dikerjakan",
+          note: "",
+          anggota: [""],
+          deadline: "",
+        });
+      } else {
+        setError(data.message || "Gagal menambah tugas.");
+      }
+    } catch {
+      setError("Gagal terhubung ke server.");
+    }
   };
 
   return (
@@ -84,6 +125,8 @@ const TambahTugas = () => {
             </h2>
             <Card style={{ borderRadius: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
               <Card.Body>
+                {success && <Alert variant="success">{success}</Alert>}
+                {error && <Alert variant="danger">{error}</Alert>}
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-3">
                     <Form.Label>
@@ -147,6 +190,16 @@ const TambahTugas = () => {
                       </Form.Group>
                     </Col>
                   </Row>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Deadline</Form.Label>
+                    <Form.Control
+                      type="date"
+                      name="deadline"
+                      value={form.deadline}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
                   {form.jenisKelompok === "Kelompok" && (
                     <Form.Group className="mb-3">
                       <Form.Label>

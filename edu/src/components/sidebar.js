@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Nav, Collapse } from "react-bootstrap";
-import { FaUser, FaTasks, FaChevronDown, FaChevronUp, FaInfoCircle, FaBars, FaTimes, FaPlus } from "react-icons/fa";
+import { FaHome, FaUser, FaTasks, FaChevronDown, FaChevronUp, FaInfoCircle, FaBars, FaTimes, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const SIDEBAR_WIDTH = 220;
@@ -68,6 +68,10 @@ const Sidebar = () => {
           <FaTimes />
         </button>
         <Nav className="flex-column mt-4">
+          <Nav.Link href="/" style={{ color: "#fff" }}>
+            <FaHome className="me-2" />
+            Home
+          </Nav.Link>
           <Nav.Link href="/akun" style={{ color: "#fff" }}>
             <FaUser className="me-2" />
             Akun Saya

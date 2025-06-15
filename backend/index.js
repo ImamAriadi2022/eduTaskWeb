@@ -114,6 +114,8 @@ app.post("/api/tugas", async (req, res) => {
   res.json({ success: true });
 });
 
+
+// debug edit
 app.put("/api/tugas/:id", async (req, res) => {
   const {
     title,
@@ -125,12 +127,25 @@ app.put("/api/tugas/:id", async (req, res) => {
     note,
     anggota,
   } = req.body;
-  await pool.query(
-    "UPDATE tugas SET title=?, course=?, type=?, jenis=?, deadline=?, status=?, note=?, anggota=? WHERE id=?",
-    [title, course, type, jenis, deadline, status, note, anggota || null, req.params.id]
-  );
-  res.json({ success: true });
+
+  // Konversi deadline ke format YYYY-MM-DD
+  const formattedDeadline = new Date(deadline).toISOString().split("T")[0];
+
+  try {
+    await pool.query(
+      "UPDATE tugas SET title=?, course=?, type=?, jenis=?, deadline=?, status=?, note=?, anggota=? WHERE id=?",
+      [title, course, type, jenis, formattedDeadline, status, note, anggota || null, req.params.id]
+    );
+
+    // Ambil data terbaru
+    const [rows] = await pool.query("SELECT * FROM tugas WHERE id = ?", [req.params.id]);
+    res.json({ success: true, updated: rows[0] });
+  } catch (err) {
+    console.error("Error saat update tugas:", err.message);
+    res.status(500).json({ success: false, message: "Gagal memperbarui tugas." });
+  }
 });
+
 
 app.delete("/api/tugas/:id", async (req, res) => {
   await pool.query("DELETE FROM tugas WHERE id = ?", [req.params.id]);

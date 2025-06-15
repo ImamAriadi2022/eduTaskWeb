@@ -20,7 +20,11 @@ const TugasKelompok = () => {
     fetch(`http://localhost:5000/api/tugas?user_id=${user.id}&type=Kelompok`)
       .then((res) => res.json())
       .then((data) => {
-        setTasks(data);
+        // Filter ulang di frontend jika backend belum filter type
+        const filtered = Array.isArray(data)
+          ? data.filter((t) => t.type === "Kelompok")
+          : [];
+        setTasks(filtered);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -69,6 +73,8 @@ const TugasKelompok = () => {
               <div className="text-center my-4">
                 <Spinner animation="border" variant="warning" />
               </div>
+            ) : tasks.length === 0 ? (
+              <div className="text-center text-muted my-4">Tidak ada tugas.</div>
             ) : (
               <Table striped bordered hover responsive>
                 <thead>
