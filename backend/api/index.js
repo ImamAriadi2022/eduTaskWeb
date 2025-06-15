@@ -41,13 +41,10 @@ app.get("/api/db-status", (req, res) => {
 });
 
 // Endpoint root
-app.get('/', (req, res) => {
-  pool.query('SELECT 1', (err, results) => {
-    if (err) {
-      console.error('SQL Error:', err);
-      return res.status(500).send('SQL Error: ' + err.message);
-    }
-    res.send('SQL Connection Successful');
+app.get("/", (req, res) => {
+  res.json({
+    message: "Server berjalan dengan baik!",
+    database: dbConnected ? "Berhasil terhubung ke database MySQL!" : "Gagal terhubung ke database MySQL.",
   });
 });
 
