@@ -50,7 +50,7 @@ const SignupPage = () => {
         <Col md={{ span: 4, offset: 4 }}>
           <div className="text-center mb-4">
             <img
-              src="/logo192.png"
+              src="/img/logo.png"
               alt="Logo Produk"
               style={{ width: 80, height: 80 }}
               className="mb-3"

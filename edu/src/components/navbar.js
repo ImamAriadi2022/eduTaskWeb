@@ -17,7 +17,7 @@ const BrandNavbar = () => {
       <Container>
         <Navbar.Brand className="d-flex align-items-center">
           <img
-            src="/logo192.png"
+            src="/img/logo.png"
             alt="Logo"
             width="40"
             height="40"
@@ -25,10 +25,10 @@ const BrandNavbar = () => {
           />
           <div>
             <div style={{ fontWeight: "bold", fontSize: "1.2rem", color: "#ff8800" }}>
-              NamaBrand
+              Edu Task
             </div>
             <div style={{ fontSize: "0.85rem", color: "#111" }}>
-              Deskripsi singkat brand Anda di sini
+              Sistem Informasi Manajemen Deadline & Tugas Kuliah
             </div>
           </div>
         </Navbar.Brand>
