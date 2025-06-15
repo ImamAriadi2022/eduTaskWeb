@@ -1,47 +1,68 @@
-import React from "react";
-import { Card } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Card, Spinner } from "react-bootstrap";
 import { Pie } from "react-chartjs-2";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 
 // Registrasi chart.js components
 Chart.register(ArcElement, Tooltip, Legend);
 
-// Data dummy distribusi tugas
-const dummyData = [
-  { type: "Individu", count: 7 },
-  { type: "Kelompok", count: 5 },
-];
+const TaskDistributionChart = () => {
+  const [data, setData] = useState({
+    labels: ["Individu", "Kelompok"],
+    datasets: [
+      {
+        data: [0, 0],
+        backgroundColor: ["#0d6efd", "#198754"],
+        borderWidth: 1,
+      },
+    ],
+  });
+  const [loading, setLoading] = useState(true);
 
-const data = {
-  labels: dummyData.map((d) => d.type),
-  datasets: [
-    {
-      data: dummyData.map((d) => d.count),
-      backgroundColor: ["#0d6efd", "#198754"],
-      borderWidth: 1,
-    },
-  ],
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    fetch(`http://localhost:5000/api/distribusi/${user.id}`)
+      .then((res) => res.json())
+      .then((dist) => {
+        setData({
+          labels: ["Individu", "Kelompok"],
+          datasets: [
+            {
+              data: [dist.individu || 0, dist.kelompok || 0],
+              backgroundColor: ["#0d6efd", "#198754"],
+              borderWidth: 1,
+            },
+          ],
+        });
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  return (
+    <Card>
+      <Card.Body>
+        <Card.Title>Distribusi Tugas</Card.Title>
+        <div style={{ width: 220, height: 220, margin: "0 auto" }}>
+          {loading ? (
+            <div className="text-center my-4">
+              <Spinner animation="border" variant="warning" />
+            </div>
+          ) : (
+            <Pie data={data} options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { position: "bottom" } },
+            }} />
+          )}
+        </div>
+      </Card.Body>
+    </Card>
+  );
 };
-
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: "bottom",
-    },
-  },
-};
-
-const TaskDistributionChart = () => (
-  <Card>
-    <Card.Body>
-      <Card.Title>Distribusi Tugas</Card.Title>
-      <div style={{ width: 220, height: 220, margin: "0 auto" }}>
-        <Pie data={data} options={options} />
-      </div>
-    </Card.Body>
-  </Card>
-);
 
 export default TaskDistributionChart;

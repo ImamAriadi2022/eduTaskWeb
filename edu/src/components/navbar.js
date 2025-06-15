@@ -1,7 +1,17 @@
 import React from "react";
-import { Navbar, Container } from "react-bootstrap";
+import { Navbar, Container, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const BrandNavbar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    navigate("/login");
+  };
+
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
   return (
     <Navbar style={{ background: "#e9ecef" }} expand="lg">
       <Container>
@@ -22,6 +32,11 @@ const BrandNavbar = () => {
             </div>
           </div>
         </Navbar.Brand>
+        {isLoggedIn && (
+          <Button variant="outline-danger" onClick={handleLogout}>
+            Logout
+          </Button>
+        )}
       </Container>
     </Navbar>
   );

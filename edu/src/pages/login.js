@@ -1,21 +1,34 @@
 import React, { useState } from "react";
-import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap";
+import { Form, Button, Container, Row, Col, Alert, InputGroup } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Login statis: username dan password harus "user" dan "123"
-    if (username === "user" && password === "123") {
-      setError("");
-      navigate("/"); // Redirect ke halaman Home
-    } else {
-      setError("Username atau password salah!");
+    setError("");
+    try {
+      const res = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/");
+      } else {
+        setError(data.message || "Username atau password salah!");
+      }
+    } catch (err) {
+      setError("Gagal terhubung ke server!");
     }
   };
 
@@ -46,13 +59,22 @@ const LoginPage = () => {
             </Form.Group>
             <Form.Group className="mb-3" controlId="formPassword">
               <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Masukkan password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-              />
+              <InputGroup>
+                <Form.Control
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Masukkan password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => setShowPassword((v) => !v)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </Button>
+              </InputGroup>
             </Form.Group>
             <Button variant="primary" type="submit" className="w-100 mb-2">
               Login

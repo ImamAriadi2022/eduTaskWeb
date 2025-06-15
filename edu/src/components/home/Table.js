@@ -1,79 +1,75 @@
-import React from "react";
-import { Table, Badge, Card } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Table, Badge, Card, Spinner } from "react-bootstrap";
 
-// Data dummy tugas
-const tasks = [
-  {
-    id: 1,
-    title: "Tugas Matematika",
-    course: "Matematika",
-    type: "Individu",
-    deadline: "2025-06-17",
-    status: "Belum Selesai",
-  },
-  {
-    id: 2,
-    title: "Proyek Kelompok Fisika",
-    course: "Fisika",
-    type: "Kelompok",
-    deadline: "2025-06-19",
-    status: "Belum Selesai",
-  },
-  {
-    id: 3,
-    title: "Makalah Sejarah",
-    course: "Sejarah",
-    type: "Individu",
-    deadline: "2025-06-19",
-    status: "Selesai",
-  },
-  {
-    id: 4,
-    title: "Presentasi Kimia",
-    course: "Kimia",
-    type: "Kelompok",
-    deadline: "2025-06-22",
-    status: "Belum Selesai",
-  },
-];
+const TaskDeadlineTable = () => {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-const TaskDeadlineTable = () => (
-  <Card>
-    <Card.Body>
-      <Card.Title>Daftar Deadline Tugas</Card.Title>
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nama Tugas</th>
-            <th>Mata Kuliah</th>
-            <th>Jenis</th>
-            <th>Deadline</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tasks.map((task, idx) => (
-            <tr key={task.id}>
-              <td>{idx + 1}</td>
-              <td>{task.title}</td>
-              <td>{task.course}</td>
-              <td>
-                <Badge bg={task.type === "Individu" ? "info" : "success"}>
-                  {task.type}
-                </Badge>
-              </td>
-              <td>{new Date(task.deadline).toLocaleDateString("id-ID")}</td>
-              <td>
-                <Badge bg={task.status === "Selesai" ? "success" : "warning"}>
-                  {task.status}
-                </Badge>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </Card.Body>
+  useEffect(() => {
+    // Ambil user dari localStorage jika ada
+    const user = JSON.parse(localStorage.getItem("user"));
+    // Jika ada user, ambil tugas berdasarkan user_id, jika tidak ambil semua
+    const url = user
+      ? `http://localhost:5000/api/tugas?user_id=${user.id}`
+      : "http://localhost:5000/api/tugas";
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        setTasks(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  return (
+    <Card>
+      <Card.Body>
+        <Card.Title>Daftar Deadline Tugas</Card.Title>
+        {loading ? (
+          <div className="text-center my-4">
+            <Spinner animation="border" variant="warning" />
+          </div>
+        ) : (
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nama Tugas</th>
+                <th>Mata Kuliah</th>
+                <th>Jenis</th>
+                <th>Deadline</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tasks.map((task, idx) => (
+                <tr key={task.id}>
+                  <td>{idx + 1}</td>
+                  <td>{task.title}</td>
+                  <td>{task.course}</td>
+                  <td>
+                    <Badge bg={task.type === "Individu" ? "info" : "success"}>
+                      {task.type}
+                    </Badge>
+                  </td>
+                  <td>
+                    {task.deadline
+                      ? new Date(task.deadline).toLocaleDateString("id-ID")
+                      : "-"}
+                  </td>
+                  <td>
+                    <Badge bg={task.status === "Selesai" ? "success" : "warning"}>
+                      {task.status}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </Card.Body>
     </Card>
-);
+  );
+};
+
 export default TaskDeadlineTable;

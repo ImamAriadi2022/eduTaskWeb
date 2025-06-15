@@ -1,31 +1,78 @@
-import React, { useState } from "react";
-import { Card, Form, Button, Alert } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Card, Form, Button, Alert, InputGroup } from "react-bootstrap";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const PengaturanAkun = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  // Ambil data user dari backend saat komponen mount
+  useEffect(() => {
+    if (user && user.id) {
+      fetch(`http://localhost:5000/api/user/${user.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setForm((prev) => ({
+            ...prev,
+            username: data.username || "",
+            email: data.email || "",
+          }));
+        })
+        .catch(() => setError("Gagal mengambil data akun"));
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccess("");
     setError("");
-    if (form.password !== form.confirmPassword) {
+    if (form.password && form.password !== form.confirmPassword) {
       setError("Kata sandi baru dan konfirmasi tidak sama.");
       return;
     }
-    // Simulasi update akun
-    setSuccess("Perubahan akun berhasil disimpan!");
-    setForm({ ...form, password: "", confirmPassword: "" });
+    try {
+      const res = await fetch(`http://localhost:5000/api/user/${user.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: form.username,
+          email: form.email,
+          password: form.password ? form.password : user.password,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSuccess("Perubahan akun berhasil disimpan!");
+        setForm({ ...form, password: "", confirmPassword: "" });
+        // Update localStorage user info
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...user,
+            username: form.username,
+            email: form.email,
+            password: form.password ? form.password : user.password,
+          })
+        );
+      } else {
+        setError(data.message || "Gagal menyimpan perubahan.");
+      }
+    } catch {
+      setError("Gagal terhubung ke server!");
+    }
   };
 
   return (
@@ -59,23 +106,43 @@ const PengaturanAkun = () => {
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Kata Sandi Baru</Form.Label>
-            <Form.Control
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="Kata sandi baru"
-            />
+            <InputGroup>
+              <Form.Control
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Kata sandi baru"
+                autoComplete="new-password"
+              />
+              <Button
+                variant="outline-secondary"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </Button>
+            </InputGroup>
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Konfirmasi Kata Sandi Baru</Form.Label>
-            <Form.Control
-              type="password"
-              name="confirmPassword"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              placeholder="Konfirmasi kata sandi baru"
-            />
+            <InputGroup>
+              <Form.Control
+                type={showConfirm ? "text" : "password"}
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                placeholder="Konfirmasi kata sandi baru"
+                autoComplete="new-password"
+              />
+              <Button
+                variant="outline-secondary"
+                onClick={() => setShowConfirm((v) => !v)}
+                tabIndex={-1}
+              >
+                {showConfirm ? <FaEyeSlash /> : <FaEye />}
+              </Button>
+            </InputGroup>
           </Form.Group>
           <Button variant="warning" type="submit">
             Simpan Perubahan

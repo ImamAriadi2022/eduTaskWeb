@@ -1,31 +1,30 @@
-import React, { useState } from "react";
-import { Card, Table, Badge, Button, Modal, Form } from "react-bootstrap";
-
-const initialTasks = [
-  {
-    id: 1,
-    title: "Makalah Matematika",
-    course: "Matematika",
-    jenis: "Makalah",
-    deadline: "2025-06-20",
-    status: "Belum Selesai",
-    note: "Kerjakan bab 1-3",
-  },
-  {
-    id: 2,
-    title: "Jurnal Fisika",
-    course: "Fisika",
-    jenis: "Jurnal",
-    deadline: "2025-06-22",
-    status: "Selesai",
-    note: "",
-  },
-];
+import React, { useState, useEffect } from "react";
+import { Card, Table, Badge, Button, Modal, Form, Spinner } from "react-bootstrap";
 
 const TugasIndividu = () => {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editTask, setEditTask] = useState(null);
+
+  // Ambil user dari localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  // Ambil data tugas individu dari backend
+  useEffect(() => {
+    if (!user) {
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
+    fetch(`http://localhost:5000/api/tugas?user_id=${user.id}&type=Individu`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTasks(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [user]);
 
   const handleEdit = (task) => {
     setEditTask({ ...task });
@@ -36,10 +35,19 @@ const TugasIndividu = () => {
     setEditTask({ ...editTask, [e.target.name]: e.target.value });
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setTasks(tasks.map((t) => (t.id === editTask.id ? editTask : t)));
-    setShowModal(false);
+    try {
+      await fetch(`http://localhost:5000/api/tugas/${editTask.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editTask),
+      });
+      setTasks(tasks.map((t) => (t.id === editTask.id ? editTask : t)));
+      setShowModal(false);
+    } catch {
+      alert("Gagal menyimpan perubahan.");
+    }
   };
 
   return (
@@ -57,46 +65,56 @@ const TugasIndividu = () => {
         </h2>
         <Card style={{ borderRadius: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
           <Card.Body>
-            <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Nama Tugas</th>
-                  <th>Mata Kuliah</th>
-                  <th>Jenis</th>
-                  <th>Deadline</th>
-                  <th>Status</th>
-                  <th>Note</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tasks.map((task, idx) => (
-                  <tr key={task.id}>
-                    <td>{idx + 1}</td>
-                    <td>{task.title}</td>
-                    <td>{task.course}</td>
-                    <td>{task.jenis}</td>
-                    <td>{new Date(task.deadline).toLocaleDateString("id-ID")}</td>
-                    <td>
-                      <Badge bg={task.status === "Selesai" ? "success" : "warning"}>
-                        {task.status}
-                      </Badge>
-                    </td>
-                    <td>{task.note}</td>
-                    <td>
-                      <Button
-                        variant="outline-warning"
-                        size="sm"
-                        onClick={() => handleEdit(task)}
-                      >
-                        Edit
-                      </Button>
-                    </td>
+            {loading ? (
+              <div className="text-center my-4">
+                <Spinner animation="border" variant="warning" />
+              </div>
+            ) : (
+              <Table striped bordered hover responsive>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nama Tugas</th>
+                    <th>Mata Kuliah</th>
+                    <th>Jenis</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                    <th>Note</th>
+                    <th>Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </Table>
+                </thead>
+                <tbody>
+                  {tasks.map((task, idx) => (
+                    <tr key={task.id}>
+                      <td>{idx + 1}</td>
+                      <td>{task.title}</td>
+                      <td>{task.course}</td>
+                      <td>{task.jenis}</td>
+                      <td>
+                        {task.deadline
+                          ? new Date(task.deadline).toLocaleDateString("id-ID")
+                          : "-"}
+                      </td>
+                      <td>
+                        <Badge bg={task.status === "Selesai" ? "success" : "warning"}>
+                          {task.status}
+                        </Badge>
+                      </td>
+                      <td>{task.note}</td>
+                      <td>
+                        <Button
+                          variant="outline-warning"
+                          size="sm"
+                          onClick={() => handleEdit(task)}
+                        >
+                          Edit
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
             {/* Modal Edit */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
               <Form onSubmit={handleSave}>
@@ -139,7 +157,7 @@ const TugasIndividu = () => {
                     <Form.Control
                       type="date"
                       name="deadline"
-                      value={editTask?.deadline || ""}
+                      value={editTask?.deadline ? editTask.deadline.slice(0, 10) : ""}
                       onChange={handleChange}
                       required
                     />
