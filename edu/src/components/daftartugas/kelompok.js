@@ -191,16 +191,6 @@ const TugasKelompok = () => {
                     </Form.Select>
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>Anggota</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="anggota"
-                      value={editTask?.anggota || ""}
-                      onChange={handleChange}
-                      placeholder="Pisahkan dengan koma, contoh: Andi, Budi, Cici"
-                    />
-                  </Form.Group>
-                  <Form.Group className="mb-3">
                     <Form.Label>Note</Form.Label>
                     <Form.Control
                       as="textarea"
