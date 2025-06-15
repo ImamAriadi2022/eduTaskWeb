@@ -17,7 +17,7 @@ const TugasIndividu = () => {
       setLoading(false);
       return;
     }
-    fetch(`http://localhost:5000/api/tugas?user_id=${user.id}&type=Individu`)
+    fetch(`https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}&type=Individu`)
       .then((res) => res.json())
       .then((data) => {
         const filtered = Array.isArray(data)
@@ -41,7 +41,7 @@ const TugasIndividu = () => {
 const handleSave = async (e) => {
   e.preventDefault();
   try {
-    const response = await fetch(`http://localhost:5000/api/tugas/${editTask.id}`, {
+    const response = await fetch(`https://edu-backend-mocha.vercel.app/api/tugas/${editTask.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

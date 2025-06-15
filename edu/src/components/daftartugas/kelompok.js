@@ -17,7 +17,7 @@ const TugasKelompok = () => {
       setLoading(false);
       return;
     }
-    fetch(`http://localhost:5000/api/tugas?user_id=${user.id}&type=Kelompok`)
+    fetch(`https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}&type=Kelompok`)
       .then((res) => res.json())
       .then((data) => {
         // Filter ulang di frontend jika backend belum filter type
@@ -42,7 +42,7 @@ const TugasKelompok = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      await fetch(`http://localhost:5000/api/tugas/${editTask.id}`, {
+      await fetch(`https://edu-backend-mocha.vercel.app/api/tugas/${editTask.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editTask),

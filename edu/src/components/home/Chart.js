@@ -25,7 +25,7 @@ const TaskDistributionChart = () => {
       setLoading(false);
       return;
     }
-    fetch(`http://localhost:5000/api/distribusi/${user.id}`)
+    fetch(`https://edu-backend-mocha.vercel.app/api/distribusi/${user.id}`)
       .then((res) => res.json())
       .then((dist) => {
         setData({

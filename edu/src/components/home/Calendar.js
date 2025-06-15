@@ -16,7 +16,7 @@ const TaskCalendar = () => {
       setLoading(false);
       return;
     }
-    fetch(`http://localhost:5000/api/kalender/${user.id}`)
+    fetch(`https://edu-backend-mocha.vercel.app/api/kalender/${user.id}`)
       .then((res) => res.json())
       .then((data) => {
         setTasks(data);

@@ -17,7 +17,7 @@ const SummaryCards = () => {
       setLoading(false);
       return;
     }
-    fetch(`http://localhost:5000/api/summary/${user.id}`)
+    fetch(`https://edu-backend-mocha.vercel.app/api/summary/${user.id}`)
       .then((res) => res.json())
       .then((data) => {
         setSummary(data);
