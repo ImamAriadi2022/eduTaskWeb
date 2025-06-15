@@ -18,17 +18,16 @@ const TentangKami = () => (
         <div className="container">
           <h2 className="mb-3" style={{ color: "#ff8800", fontWeight: "bold" }}>Tentang Kami</h2>
           <div style={{ background: "#fff", borderRadius: 12, padding: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-            <p>
-              <b>EduTaskWeb</b> adalah platform manajemen tugas kuliah yang membantu mahasiswa dalam mengatur, memantau, dan menyelesaikan tugas-tugas individu maupun kelompok secara efisien. Kami menyediakan fitur kalender, distribusi tugas, notifikasi deadline, dan statistik tugas agar proses belajar menjadi lebih terstruktur dan produktif.
-            </p>
-            <p>
-              Dengan tampilan yang sederhana dan informatif, EduTaskWeb hadir untuk mendukung mahasiswa mencapai hasil terbaik dalam perkuliahan. Kami percaya, pengelolaan waktu dan tugas yang baik adalah kunci sukses akademik.
-            </p>
-            <p>
-              <b>Hubungi Kami:</b><br />
-              Email: support@edutaskweb.com<br />
-              Instagram: @edutaskweb
-            </p>
+          <p>
+                      <b>Edu Task</b>  adalah teman setia mahasiswa dalam mengatur tugas dan deadline kuliah.
+          Kami tahu gimana ribetnya ngatur banyak tugas, jadwal kuliah, dan kegiatan lainnya.
+          Makanya, Edu Task hadir buat bantu kamu tetap on track!
+          </p>
+          <p>
+                      Dengan fitur pencatat deadline, pengingat tugas, dan jadwal kuliah yang praktis, kami
+          siap jadi solusi biar tugas nggak lagi numpuk atau kelupaan. Simpel, cepat, dan pastinya
+          ngebantu!
+          </p>
           </div>
         </div>
       </div>
