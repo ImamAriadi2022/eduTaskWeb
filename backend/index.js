@@ -8,11 +8,19 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Koneksi database
+// const dbConfig = {
+//   host: "localhost",
+//   user: "root",
+//   password: "", // ganti sesuai password MySQL Anda
+//   database: "edutaskweb",
+// };
+
+// buat hosting
 const dbConfig = {
-  host: "localhost",
-  user: "root",
-  password: "", // ganti sesuai password MySQL Anda
-  database: "edutaskweb",
+  host: "be4sseafumlbc7htqz21-mysql.services.clever-cloud.com",
+  user: "utq4cnbx3xx0w9jc",
+  password: "aSUSzAw9nr6AUF7RdIQd", // ganti sesuai password MySQL Anda
+  database: "be4sseafumlbc7htqz21",
 };
 
 let pool;
@@ -38,6 +46,15 @@ app.get("/api/db-status", (req, res) => {
   } else {
     res.status(500).json({ connected: false, message: "Database tidak terhubung" });
   }
+});
+
+
+// endpoint root
+app.get("/", (req, res) => {
+  res.json({
+    message: "Server berjalan dengan baik!",
+    database: dbConnected ? "Berhasil terhubung ke database MySQL!" : "Gagal terhubung ke database MySQL.",
+  });
 });
 
 // --- ENDPOINT AUTH ---
