@@ -201,40 +201,7 @@ const TambahTugas = () => {
                     />
                   </Form.Group>
                   {form.jenisKelompok === "Kelompok" && (
-                    <Form.Group className="mb-3">
-                      <Form.Label>
-                        <FaUsers className="me-2" />
-                        Anggota Kelompok
-                      </Form.Label>
-                      {form.anggota.map((nama, idx) => (
-                        <InputGroup className="mb-2" key={idx}>
-                          <Form.Control
-                            type="text"
-                            value={nama}
-                            onChange={(e) => handleAnggotaChange(idx, e.target.value)}
-                            placeholder={`Nama anggota ${idx + 1}`}
-                            required
-                          />
-                          {form.anggota.length > 1 && (
-                            <Button
-                              variant="danger"
-                              onClick={() => handleRemoveAnggota(idx)}
-                              tabIndex={-1}
-                            >
-                              <FaTrash />
-                            </Button>
-                          )}
-                        </InputGroup>
-                      ))}
-                      <Button
-                        variant="info"
-                        onClick={handleAddAnggota}
-                        className="mt-1"
-                        type="button"
-                      >
-                        <FaPlus className="me-1" /> Tambah Anggota
-                      </Button>
-                    </Form.Group>
+                   console.log(form.anggota)
                   )}
                   <Form.Group className="mb-3">
                     <Form.Label>Status Tugas</Form.Label>

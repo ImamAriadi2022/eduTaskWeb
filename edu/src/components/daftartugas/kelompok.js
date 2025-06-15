@@ -85,7 +85,6 @@ const TugasKelompok = () => {
                     <th>Jenis</th>
                     <th>Deadline</th>
                     <th>Status</th>
-                    <th>Anggota</th>
                     <th>Note</th>
                     <th>Aksi</th>
                   </tr>
@@ -115,7 +114,6 @@ const TugasKelompok = () => {
                           {task.status}
                         </Badge>
                       </td>
-                      <td>{task.anggota}</td>
                       <td>{task.note}</td>
                       <td>
                         <Button
