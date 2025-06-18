@@ -16,7 +16,6 @@ const dbConfig = {
 };
 
 
-
 let pool;
 let dbConnected = false;
 
@@ -100,9 +99,29 @@ app.get("/api/tugas", async (req, res) => {
 });
 
 app.get("/api/tugas/:id", async (req, res) => {
-  const [rows] = await pool.query("SELECT * FROM tugas WHERE id = ?", [req.params.id]);
-  if (rows.length > 0) res.json(rows[0]);
-  else res.status(404).json({ message: "Tugas tidak ditemukan" });
+  const taskId = req.params.id;
+  const userId = req.query.user_id; // Ambil user_id dari query string
+
+  if (!userId) {
+    return res.status(400).json({ success: false, message: "User ID diperlukan." });
+  }
+
+  try {
+    // Ambil tugas berdasarkan id dan user_id
+    const [rows] = await pool.query(
+      "SELECT * FROM tugas WHERE id = ? AND user_id = ?",
+      [taskId, userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Tugas tidak ditemukan." });
+    }
+
+    res.json({ success: true, task: rows[0] });
+  } catch (err) {
+    console.error("Error saat mengambil tugas:", err.message);
+    res.status(500).json({ success: false, message: "Gagal mengambil tugas." });
+  }
 });
 
 app.post("/api/tugas", async (req, res) => {
