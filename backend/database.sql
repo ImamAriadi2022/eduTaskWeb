@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS tugas (
   deadline DATE,
   status VARCHAR(30) NOT NULL,
   note TEXT,
-  anggota TEXT,
+  anggota TEXT DEFAULT NULL,
   user_id INT,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

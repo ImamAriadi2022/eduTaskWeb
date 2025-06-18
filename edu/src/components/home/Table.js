@@ -8,17 +8,28 @@ const TaskDeadlineTable = () => {
   useEffect(() => {
     // Ambil user dari localStorage jika ada
     const user = JSON.parse(localStorage.getItem("user"));
-    // Jika ada user, ambil tugas berdasarkan user_id, jika tidak ambil semua
-    const url = user
-      ? `https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}`
-      : "https://edu-backend-mocha.vercel.app/api/tugas";
+    if (!user) {
+      setTasks([]); // Jika tidak ada user, kosongkan tugas
+      setLoading(false);
+      return;
+    }
+
+    // Ambil tugas berdasarkan user_id
+    const url = `https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}`;
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        setTasks(data);
+        if (data.success && Array.isArray(data.tasks)) {
+          setTasks(data.tasks); // Pastikan hanya mengambil array tugas
+        } else {
+          setTasks([]); // Jika respons tidak valid, kosongkan tugas
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setTasks([]); // Jika terjadi error, kosongkan tugas
+        setLoading(false);
+      });
   }, []);
 
   return (

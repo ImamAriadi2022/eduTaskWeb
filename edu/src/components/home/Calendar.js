@@ -19,10 +19,17 @@ const TaskCalendar = () => {
     fetch(`https://edu-backend-mocha.vercel.app/api/kalender/${user.id}`)
       .then((res) => res.json())
       .then((data) => {
-        setTasks(data);
+        if (data.success && Array.isArray(data.tasks)) {
+          setTasks(data.tasks); // Ambil array tasks dari respons
+        } else {
+          setTasks([]); // Jika tidak ada tugas, set tasks sebagai array kosong
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setTasks([]);
+        setLoading(false);
+      });
   }, []);
 
   function getTasksByDate(date) {

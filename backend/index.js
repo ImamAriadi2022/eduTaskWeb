@@ -8,11 +8,18 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Koneksi database
+// const dbConfig = {
+//   host: "be4sseafumlbc7htqz21-mysql.services.clever-cloud.com",
+//   user: "utq4cnbx3xx0w9jc",
+//   password: "aSUSzAw9nr6AUF7RdIQd",
+//   database: "be4sseafumlbc7htqz21",
+// };
+
 const dbConfig = {
-  host: "be4sseafumlbc7htqz21-mysql.services.clever-cloud.com",
-  user: "utq4cnbx3xx0w9jc",
-  password: "aSUSzAw9nr6AUF7RdIQd",
-  database: "be4sseafumlbc7htqz21",
+  host: "localhost",
+  user: "root",
+  password: "", 
+  database: "edutaskweb", 
 };
 
 let pool;
@@ -115,11 +122,27 @@ app.post("/api/tugas", async (req, res) => {
     anggota,
     user_id,
   } = req.body;
-  await pool.query(
-    "INSERT INTO tugas (title, course, type, jenis, deadline, status, note, anggota, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    [title, course, type, jenis, deadline, status, note, anggota || null, user_id]
-  );
-  res.json({ success: true });
+
+  try {
+    await pool.query(
+      "INSERT INTO tugas (title, course, type, jenis, deadline, status, note, anggota, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        title || null, // Jika title tidak diberikan, gunakan NULL
+        course || null, // Jika course tidak diberikan, gunakan NULL
+        type || null, // Jika type tidak diberikan, gunakan NULL
+        jenis || null, // Jika jenis tidak diberikan, gunakan NULL
+        deadline || null, // Jika deadline tidak diberikan, gunakan NULL
+        status || null, // Jika status tidak diberikan, gunakan NULL
+        note || null, // Jika note tidak diberikan, gunakan NULL
+        anggota || null, // Jika anggota tidak diberikan, gunakan NULL
+        user_id || null, // Jika user_id tidak diberikan, gunakan NULL
+      ]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error saat menambahkan tugas:", err.message);
+    res.status(500).json({ success: false, message: "Gagal menambahkan tugas." });
+  }
 });
 
 app.put("/api/tugas/:id", async (req, res) => {
@@ -180,8 +203,25 @@ app.get("/api/distribusi/:user_id", async (req, res) => {
 // --- ENDPOINT KALENDER TUGAS ---
 app.get("/api/kalender/:user_id", async (req, res) => {
   const user_id = req.params.user_id;
-  const [rows] = await pool.query("SELECT id, title, deadline, type FROM tugas WHERE user_id = ?", [user_id]);
-  res.json(rows);
+
+  try {
+    // Ambil tugas dengan format yang sesuai untuk kalender
+    const [rows] = await pool.query(
+      "SELECT id, title, DATE_FORMAT(deadline, '%Y-%m-%d') AS deadline, type FROM tugas WHERE user_id = ? ORDER BY deadline ASC",
+      [user_id]
+    );
+
+    // Jika tidak ada tugas, kembalikan pesan kosong
+    if (rows.length === 0) {
+      return res.json({ success: true, message: "Tidak ada tugas untuk ditampilkan di kalender.", tasks: [] });
+    }
+
+    // Kembalikan data tugas
+    res.json({ success: true, tasks: rows });
+  } catch (err) {
+    console.error("Error saat mengambil data kalender:", err.message);
+    res.status(500).json({ success: false, message: "Gagal mengambil data kalender." });
+  }
 });
 
 // --- SERVER LISTEN ---

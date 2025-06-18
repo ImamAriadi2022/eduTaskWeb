@@ -17,17 +17,22 @@ const TugasKelompok = () => {
       setLoading(false);
       return;
     }
+
+    // Ambil tugas berdasarkan user_id dan type=Kelompok
     fetch(`https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}&type=Kelompok`)
       .then((res) => res.json())
       .then((data) => {
-        // Filter ulang di frontend jika backend belum filter type
-        const filtered = Array.isArray(data)
-          ? data.filter((t) => t.type === "Kelompok")
-          : [];
-        setTasks(filtered);
+        if (data.success && Array.isArray(data.tasks)) {
+          setTasks(data.tasks); // Pastikan hanya mengambil tugas milik user
+        } else {
+          setTasks([]); // Jika respons tidak valid, kosongkan tugas
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setTasks([]);
+        setLoading(false);
+      });
   }, [user]);
 
   const handleEdit = (task) => {
@@ -42,13 +47,27 @@ const TugasKelompok = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      await fetch(`https://edu-backend-mocha.vercel.app/api/tugas/${editTask.id}`, {
+      const response = await fetch(`https://edu-backend-mocha.vercel.app/api/tugas/${editTask.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editTask),
+        body: JSON.stringify({
+          title: editTask.title,
+          course: editTask.course,
+          type: "Kelompok",
+          jenis: editTask.jenis,
+          deadline: editTask.deadline.slice(0, 10), // Format YYYY-MM-DD
+          status: editTask.status,
+          note: editTask.note,
+          anggota: editTask.anggota || null,
+        }),
       });
-      setTasks(tasks.map((t) => (t.id === editTask.id ? editTask : t)));
-      setShowModal(false);
+      const result = await response.json();
+      if (result.success) {
+        setTasks(tasks.map((t) => (t.id === editTask.id ? result.updated : t)));
+        setShowModal(false);
+      } else {
+        alert("Gagal menyimpan perubahan.");
+      }
     } catch {
       alert("Gagal menyimpan perubahan.");
     }

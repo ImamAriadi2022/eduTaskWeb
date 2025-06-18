@@ -17,16 +17,22 @@ const TugasIndividu = () => {
       setLoading(false);
       return;
     }
+
+    // Ambil tugas berdasarkan user_id dan type=Individu
     fetch(`https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}&type=Individu`)
       .then((res) => res.json())
       .then((data) => {
-        const filtered = Array.isArray(data)
-          ? data.filter((t) => t.type === "Individu")
-          : [];
-        setTasks(filtered);
+        if (data.success && Array.isArray(data.tasks)) {
+          setTasks(data.tasks); // Pastikan hanya mengambil tugas milik user
+        } else {
+          setTasks([]); // Jika respons tidak valid, kosongkan tugas
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setTasks([]);
+        setLoading(false);
+      });
   }, [user]);
 
   const handleEdit = (task) => {
@@ -38,34 +44,34 @@ const TugasIndividu = () => {
     setEditTask({ ...editTask, [e.target.name]: e.target.value });
   };
 
-const handleSave = async (e) => {
-  e.preventDefault();
-  try {
-    const response = await fetch(`https://edu-backend-mocha.vercel.app/api/tugas/${editTask.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: editTask.title,
-        course: editTask.course,
-        type: "Individu",
-        jenis: editTask.jenis,
-        deadline: editTask.deadline.slice(0, 10), // Format YYYY-MM-DD
-        status: editTask.status,
-        note: editTask.note,
-        anggota: null,
-      }),
-    });
-    const result = await response.json();
-    if (result.success) {
-      setTasks(tasks.map((t) => (t.id === editTask.id ? result.updated : t)));
-      setShowModal(false);
-    } else {
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`https://edu-backend-mocha.vercel.app/api/tugas/${editTask.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editTask.title,
+          course: editTask.course,
+          type: "Individu",
+          jenis: editTask.jenis,
+          deadline: editTask.deadline.slice(0, 10), // Format YYYY-MM-DD
+          status: editTask.status,
+          note: editTask.note,
+          anggota: null,
+        }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setTasks(tasks.map((t) => (t.id === editTask.id ? result.updated : t)));
+        setShowModal(false);
+      } else {
+        alert("Gagal menyimpan perubahan.");
+      }
+    } catch {
       alert("Gagal menyimpan perubahan.");
     }
-  } catch {
-    alert("Gagal menyimpan perubahan.");
-  }
-};
+  };
 
   return (
     <div

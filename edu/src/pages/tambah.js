@@ -28,7 +28,6 @@ const TambahTugas = () => {
     jenisTugasLain: "",
     status: "Belum Dikerjakan",
     note: "",
-    anggota: [""],
     deadline: "",
   });
   const [success, setSuccess] = useState("");
@@ -65,10 +64,6 @@ const TambahTugas = () => {
       return;
     }
     // Validasi anggota kelompok jika kelompok
-    if (form.jenisKelompok === "Kelompok" && form.anggota.some((a) => !a.trim())) {
-      setError("Nama anggota kelompok tidak boleh kosong.");
-      return;
-    }
     try {
       const res = await fetch("https://edu-backend-mocha.vercel.app/api/tugas", {
         method: "POST",
@@ -81,7 +76,6 @@ const TambahTugas = () => {
           deadline: form.deadline,
           status: form.status,
           note: form.note,
-          anggota: form.jenisKelompok === "Kelompok" ? form.anggota.join(", ") : null,
           user_id: user.id,
         }),
       });
@@ -95,7 +89,6 @@ const TambahTugas = () => {
           jenisTugasLain: "",
           status: "Belum Dikerjakan",
           note: "",
-          anggota: [""],
           deadline: "",
         });
       } else {
