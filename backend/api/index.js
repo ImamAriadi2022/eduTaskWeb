@@ -16,6 +16,7 @@ const dbConfig = {
 };
 
 
+
 let pool;
 let dbConnected = false;
 
@@ -94,8 +95,23 @@ app.put("/api/user/:id", async (req, res) => {
 
 // --- ENDPOINT TUGAS ---
 app.get("/api/tugas", async (req, res) => {
-  const [rows] = await pool.query("SELECT * FROM tugas");
-  res.json(rows);
+  const userId = req.query.user_id; // Ambil user_id dari query string
+
+  if (!userId) {
+    return res.status(400).json({ success: false, message: "User ID diperlukan." });
+  }
+
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM tugas WHERE user_id = ?",
+      [userId]
+    );
+
+    res.json({ success: true, tasks: rows });
+  } catch (err) {
+    console.error("Error saat mengambil tugas:", err.message);
+    res.status(500).json({ success: false, message: "Gagal mengambil tugas." });
+  }
 });
 
 app.get("/api/tugas/:id", async (req, res) => {

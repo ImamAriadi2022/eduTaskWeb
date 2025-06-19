@@ -65,7 +65,7 @@ const TambahTugas = () => {
     }
     // Validasi anggota kelompok jika kelompok
     try {
-      const res = await fetch("https://edu-backend-mocha.vercel.app/api/tugas", {
+      const res = await fetch(" https://edu-backend-mocha.vercel.app/api/tugas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -18,7 +18,7 @@ const PengaturanAkun = () => {
   // Ambil data user dari backend saat komponen mount
   useEffect(() => {
     if (user && user.id) {
-      fetch(`https://edu-backend-mocha.vercel.app/api/user/${user.id}`)
+      fetch(` https://edu-backend-mocha.vercel.app/api/user/${user.id}`)
         .then((res) => res.json())
         .then((data) => {
           setForm((prev) => ({
@@ -44,7 +44,7 @@ const PengaturanAkun = () => {
       return;
     }
     try {
-      const res = await fetch(`https://edu-backend-mocha.vercel.app/api/user/${user.id}`, {
+      const res = await fetch(` https://edu-backend-mocha.vercel.app/api/user/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

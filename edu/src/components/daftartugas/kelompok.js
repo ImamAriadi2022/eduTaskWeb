@@ -11,29 +11,31 @@ const TugasKelompok = () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   // Ambil data tugas kelompok dari backend
-  useEffect(() => {
-    if (!user) {
+useEffect(() => {
+  if (!user) {
+    setTasks([]);
+    setLoading(false);
+    return;
+  }
+
+  // Ambil semua tugas dari backend
+  fetch(`https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success && Array.isArray(data.tasks)) {
+        // Filter hanya tugas dengan tipe Individu
+        const individuTasks = data.tasks.filter((task) => task.type === "Kelompok");
+        setTasks(individuTasks);
+      } else {
+        setTasks([]); // Jika respons tidak valid, kosongkan tugas
+      }
+      setLoading(false);
+    })
+    .catch(() => {
       setTasks([]);
       setLoading(false);
-      return;
-    }
-
-    // Ambil tugas berdasarkan user_id dan type=Kelompok
-    fetch(`https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}&type=Kelompok`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.tasks)) {
-          setTasks(data.tasks); // Pastikan hanya mengambil tugas milik user
-        } else {
-          setTasks([]); // Jika respons tidak valid, kosongkan tugas
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setTasks([]);
-        setLoading(false);
-      });
-  }, [user]);
+    });
+}, [user]);
 
   const handleEdit = (task) => {
     setEditTask({ ...task });
@@ -47,7 +49,7 @@ const TugasKelompok = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`https://edu-backend-mocha.vercel.app/api/tugas/${editTask.id}`, {
+      const response = await fetch(` https://edu-backend-mocha.vercel.app/api/tugas/${editTask.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

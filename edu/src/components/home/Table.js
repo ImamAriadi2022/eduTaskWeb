@@ -6,28 +6,29 @@ const TaskDeadlineTable = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Ambil user dari localStorage jika ada
     const user = JSON.parse(localStorage.getItem("user"));
+    console.log("User dari localStorage:", user); // Tambahkan log ini
     if (!user) {
-      setTasks([]); // Jika tidak ada user, kosongkan tugas
+      setTasks([]);
       setLoading(false);
       return;
     }
 
-    // Ambil tugas berdasarkan user_id
     const url = `https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}`;
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
+        console.log("Data tugas dari API:", data); // Tambahkan log ini
         if (data.success && Array.isArray(data.tasks)) {
-          setTasks(data.tasks); // Pastikan hanya mengambil array tugas
+          setTasks(data.tasks);
         } else {
-          setTasks([]); // Jika respons tidak valid, kosongkan tugas
+          setTasks([]);
         }
         setLoading(false);
       })
-      .catch(() => {
-        setTasks([]); // Jika terjadi error, kosongkan tugas
+      .catch((err) => {
+        console.error("Error saat fetch data:", err); // Tambahkan log ini
+        setTasks([]);
         setLoading(false);
       });
   }, []);

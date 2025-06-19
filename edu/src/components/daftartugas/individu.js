@@ -11,29 +11,31 @@ const TugasIndividu = () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   // Ambil data tugas individu dari backend
-  useEffect(() => {
-    if (!user) {
+useEffect(() => {
+  if (!user) {
+    setTasks([]);
+    setLoading(false);
+    return;
+  }
+
+  // Ambil semua tugas dari backend
+  fetch(`https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success && Array.isArray(data.tasks)) {
+        // Filter hanya tugas dengan tipe Individu
+        const individuTasks = data.tasks.filter((task) => task.type === "Individu");
+        setTasks(individuTasks);
+      } else {
+        setTasks([]); // Jika respons tidak valid, kosongkan tugas
+      }
+      setLoading(false);
+    })
+    .catch(() => {
       setTasks([]);
       setLoading(false);
-      return;
-    }
-
-    // Ambil tugas berdasarkan user_id dan type=Individu
-    fetch(`https://edu-backend-mocha.vercel.app/api/tugas?user_id=${user.id}&type=Individu`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.tasks)) {
-          setTasks(data.tasks); // Pastikan hanya mengambil tugas milik user
-        } else {
-          setTasks([]); // Jika respons tidak valid, kosongkan tugas
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setTasks([]);
-        setLoading(false);
-      });
-  }, [user]);
+    });
+}, [user]);
 
   const handleEdit = (task) => {
     setEditTask({ ...task }); // pastikan semua field ikut, termasuk type
@@ -47,7 +49,7 @@ const TugasIndividu = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`https://edu-backend-mocha.vercel.app/api/tugas/${editTask.id}`, {
+      const response = await fetch(` https://edu-backend-mocha.vercel.app/api/tugas/${editTask.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
